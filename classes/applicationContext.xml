@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd">
+	<context:component-scan base-package="com.clx.action;com.clx.aop"></context:component-scan>
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+	
+	<bean id="datasource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver">
+		</property>
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/booksys">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value="123456"></property>
+	</bean>
+	<!-- spring中配置的sessionfactory默认是自动提交的 -->
+	<bean id="sessionfactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="datasource"></property>
+		<property name="hibernateProperties">
+		    <props>
+		        <prop key="dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+		        <prop key="hibernate.show_sql">true</prop>
+		        <prop key="hibernate.format_sql">true</prop>
+		    </props>
+		</property>
+		<property name="mappingResources">
+		    <list>
+		        <value>com/clx/model/User.hbm.xml</value>
+		        <value>com/clx/model/Book.hbm.xml</value>
+		        <value>com/clx/model/Role.hbm.xml</value>
+		    </list>
+		</property>
+	</bean>
+	<!-- hibernatetemplate中没有封装事务开启，提交；	-->
+	<bean id="hibernatetemplate"
+		class="org.springframework.orm.hibernate5.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionfactory"></property>
+	</bean>
+	<bean id="pageutil" class="com.clx.util.PageUtil">
+	    <property name="hibernateTemplate" ref="hibernatetemplate"></property>
+	</bean>
+	<bean id="userserviceimp" class="com.clx.service.UserServiceImp">
+	    <property name="hibernatetemplate" ref="hibernatetemplate"></property>
+	</bean>
+	<bean id="bookserviceimp" class="com.clx.service.BookServiceImp">
+	     <property name="hibernatetemplate" ref="hibernatetemplate"></property>
+	</bean>
+	
+	<bean id="user" class="com.clx.model.User" scope="prototype"></bean>
+	
+	<bean id="loginbean" class="com.clx.action.LoginAction" scope="prototype">
+	    <property name="userserviceimp" ref="userserviceimpproxy"></property>
+	    <property name="user" ref="user"></property>
+	</bean>
+	
+	<bean id="showbean" class="com.clx.action.ShowAction" scope="prototype">
+	    <property name="pageUtil" ref="pageutilproxy"></property>
+	    <property name="userserviceimp" ref="userserviceimpproxy"></property>
+	    <property name="bookserviceimp" ref="bookserviceimpproxy"></property>
+	</bean>
+	<bean id="bookactionbean" class="com.clx.action.BookAction">
+	    <property name="userserviceimpproxy" ref="userserviceimpproxy"></property>
+	    <property name="bookserviceimpproxy" ref="bookserviceimpproxy"></property>
+	</bean>
+	<bean id="transactionManager"
+	 	class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+	 	<property name="sessionFactory" ref="sessionfactory"></property>
+	 </bean>
+	
+	<!-- 默认配置下，spring只有在抛出的异常为运行时unchecked异常时才回滚该事务，也就是抛出的异常为RuntimeException的子类(Errors也会导致事务回滚)，而抛出checked异常则不会导致事务回滚。
+	 可以明确的配置在抛出那些异常时回滚事务，包括checked异常。 -->
+	 <bean id="userserviceimpproxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	   <property name="transactionManager" ref="transactionManager"/>
+	    <property name="target" ref="userserviceimp"/>
+	    <property name="proxyTargetClass">  
+           <value>true</value>  <!-- 开启代理类很重要，如不开启默认用jdk代理机制产生的 是接口代理对象，注入需要转化为类的时候因为不支持转化会失败报异常，开启则用cglib产生类代理对象 -->
+        </property>        
+	   <property name="transactionAttributes">
+	     <props>
+	       <prop key="login">PROPAGATION_REQUIRED,readOnly</prop>
+	       <prop key="nameIsExist">PROPAGATION_REQUIRED,readOnly</prop>
+	       <prop key="*">PROPAGATION_REQUIRED</prop>
+	     </props>
+	   </property>
+ 	</bean>
+ 	
+	  <bean id="bookserviceimpproxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	   <property name="transactionManager" ref="transactionManager"/>
+	    <property name="target" ref="bookserviceimp"/>
+	    <property name="proxyTargetClass">  
+           <value>true</value>  <!-- 开启代理类很重要，如不开启默认用jdk代理机制产生的 是接口代理对象，注入需要转化为类的时候因为不支持转化会失败报异常，开启则用cglib产生类代理对象 -->
+        </property>        
+	   <property name="transactionAttributes">
+	     <props>
+	       <prop key="*">PROPAGATION_REQUIRED</prop>
+	     </props>
+	   </property>
+ 	</bean>
+ 	
+	 <bean id="pageutilproxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	   <property name="transactionManager" ref="transactionManager"/>
+	    <property name="target" ref="pageutil"/>
+	    <property name="proxyTargetClass">  
+           <value>true</value>  <!-- 开启代理类很重要，如不开启默认用jdk代理机制产生的 是接口代理对象，注入需要转化为类的时候因为不支持转化会失败报异常，开启则用cglib产生类代理对象 -->
+        </property>        
+	   <property name="transactionAttributes">
+	     <props>
+	       <prop key="*">PROPAGATION_REQUIRED</prop>
+	     </props>
+	   </property>
+ 	</bean>
+	 
+	 
+	 
+	 <bean id="logaspect" class="com.clx.aop.LogAspect"></bean>
+	 <aop:config proxy-target-class="true"> <!-- 开启代理类很重要，如不开启默认用jdk代理机制产生的 是接口代理对象，注入需要转化为类的时候因为不支持转化会失败报异常，开启则用cglib产生类代理对象 -->
+	     <aop:aspect  ref="logaspect">
+	         <aop:pointcut expression="execution(* com.clx.service.*.*(..))" id="pc"/>
+	         <aop:before pointcut-ref="pc" method="before" />
+	     </aop:aspect>
+	     
+	 </aop:config>
+	 
+</beans>

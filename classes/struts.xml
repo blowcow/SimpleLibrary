@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.1.7//EN"
+    "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+   
+ <struts>
+     <constant name="struts.devMode" value="true"/> 
+     <package name="mypacke" extends="struts-default">
+         <interceptors>
+             <interceptor name="LoginInterceptor" class="com.clx.interceptor.LoginInterceptor"></interceptor>
+             <interceptor name="ManagerPrivilegeInterceptor" class="com.clx.interceptor.ManagerPrivilegeInterceptor">
+                 <param name="includeMethods">querybook,updatebook</param>
+             </interceptor>
+             <interceptor name="SuperManagerPrivilegeInterceptor" class="com.clx.interceptor.SuperManagerPrivilegeInterceptor">
+                 <param name="includeMethods">changerole</param>
+             </interceptor>
+             <interceptor-stack name="mystack">
+                 <interceptor-ref name="defaultStack"></interceptor-ref>
+                 <interceptor-ref name="LoginInterceptor"></interceptor-ref>	<!-- 登录过滤已有LoginFilter过滤，该拦截器可有可无	-->
+                 <interceptor-ref name="ManagerPrivilegeInterceptor"></interceptor-ref>
+                 <interceptor-ref name="SuperManagerPrivilegeInterceptor"></interceptor-ref>
+             </interceptor-stack>
+         </interceptors>
+         <default-interceptor-ref name="mystack"></default-interceptor-ref>
+         <global-results>
+             <result name="input">index.html</result>
+         </global-results>
+         <action name="login" class="loginbean" method="login">
+             <result name="success" type="redirectAction">/ShowAction</result>
+         </action>
+         <action name="register" class="loginbean" method="register">
+             <result name="success">WEB-INF/regsuccess.jsp</result>
+         </action>
+         <action name="testname" class="loginbean" method="testname">
+         </action>
+         <action name="ShowAction" class="showbean">
+             <result name="booklist">booklist.jsp</result>
+              <result name="mybook">mybook.jsp</result>
+               <result name="managebook">managebook.jsp</result>
+                <result name="manageuser">manageuser.jsp</result>	
+                 <result name="privilege">privilege.jsp</result>
+         </action>
+         <action name="LendBook" class="bookactionbean" method="lendbook"></action>
+         <action name="BackBook" class="bookactionbean" method="backbook"></action>
+         <action name="QueryBook"  class="bookactionbean" method="querybook">
+             <result name="booktable">booktable.jsp</result>
+         </action>
+         <action name="UpdateBook"  class="bookactionbean" method="updatebook"></action>
+         <action name="ChangeRole" class="useractionbean" method="changerole"></action>
+     </package>
+ </struts>

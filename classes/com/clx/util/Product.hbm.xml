@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2018-2-1 20:48:34 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="com.clx.util.Product" table="PRODUCT">
+        <id name="productid" type="int">
+            <column name="PRODUCTID" />
+            <generator class="increment" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="price" type="double">
+            <column name="PRICE" />
+        </property>
+        <one-to-one name="factory" class="com.clx.util.Factory"></one-to-one>
+    </class>
+</hibernate-mapping>

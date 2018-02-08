@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2018-2-2 15:33:29 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="com.clx.model.Book" table="BOOK">
+        <id name="bookid" type="int">
+            <column name="BOOKID" />
+            <generator class="native" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="author" type="java.lang.String">
+            <column name="AUTHOR" />
+        </property>
+        <property name="price" type="double">
+            <column name="PRICE" />
+        </property>
+        <property name="count" type="int">
+            <column name="COUNT" />
+        </property>
+        <set name="user" table="user_book" inverse="false" lazy="true" >
+            <key>
+                <column name="BOOKID" />
+            </key>
+            <many-to-many class="com.clx.model.User" column="USERID"/>
+        </set>
+    </class>
+</hibernate-mapping>

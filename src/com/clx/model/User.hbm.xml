@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2018-2-2 15:33:29 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="com.clx.model.User" table="USER">
+        <id name="userid" type="int">
+            <column name="USERID" />
+            <generator class="native" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="pass" type="java.lang.String">
+            <column name="PASS" />
+        </property>
+        <property name="question" type="java.lang.String">
+            <column name="QUESTION" />
+        </property>
+        <property name="answer" type="java.lang.String">
+            <column name="ANSWER" />
+        </property>
+        <many-to-one name="role" class="com.clx.model.Role" fetch="join">
+            <column name="ROLEID" />
+        </many-to-one>
+        <set name="books" table="user_book" inverse="false" lazy="true" >
+            <key>
+                <column name="USERID" />
+            </key>
+            <many-to-many class="com.clx.model.Book" column="BOOKID"/>
+        </set>
+    </class>
+</hibernate-mapping>

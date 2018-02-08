@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2018-2-1 20:48:34 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="com.clx.util.Factory" table="FACTORY">
+        <id name="factoryid" type="int">
+            <column name="FACTORYID" />
+            <generator class="increment" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <one-to-one name="product" class="com.clx.util.Product"></one-to-one>
+    </class>
+</hibernate-mapping>
